@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reorder Stock Calculator</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            max-width: 600px;
+            width: 100%;
+        }
+        .calculator-card {
+            background-color: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        h2 {
+            margin-top: 0;
+            color: #2c3e50;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        .formula {
+            background-color: #e8f4f8;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 14px;
+            margin-bottom: 20px;
+            color: #0056b3;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .result-box {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e2f0e5;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .result-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #28a745;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>📦 Reorder Stock Tools</h1>
+
+        <!-- 1. Reorder Point Calculator -->
+        <div class="calculator-card">
+            <h2>1. Reorder Point (When to Order)</h2>
+            <div class="formula">Formula: (Average Daily Usage × Lead Time) + Safety Stock</div>
+            
+            <div class="form-group">
+                <label for="dailyUsage">Average Daily Usage (units)</label>
+                <input type="number" id="dailyUsage" placeholder="e.g., 50">
+            </div>
+            <div class="form-group">
+                <label for="leadTime">Lead Time (days it takes to arrive)</label>
+                <input type="number" id="leadTime" placeholder="e.g., 7">
+            </div>
+            <div class="form-group">
+                <label for="safetyStock">Safety Stock (backup units)</label>
+                <input type="number" id="safetyStock" placeholder="e.g., 100">
+            </div>
+            
+            <button onclick="calculateROP()">Calculate Reorder Point</button>
+            
+            <div class="result-box">
+                Order more stock when inventory drops to:<br>
+                <span class="result-value" id="ropResult">0 units</span>
+            </div>
+        </div>
+
+        <!-- 2. Economic Order Quantity Calculator -->
+        <div class="calculator-card">
+            <h2>2. EOQ (How Much to Order)</h2>
+            <div class="formula">Formula: √ ( (2 × Annual Demand × Order Cost) / Holding Cost )</div>
+            
+            <div class="form-group">
+                <label for="demand">Annual Demand (total units per year)</label>
+                <input type="number" id="demand" placeholder="e.g., 10000">
+            </div>
+            <div class="form-group">
+                <label for="orderCost">Cost Per Order ($)</label>
+                <input type="number" id="orderCost" placeholder="e.g., 50">
+            </div>
+            <div class="form-group">
+                <label for="holdingCost">Annual Holding Cost Per Unit ($)</label>
+                <input type="number" id="holdingCost" placeholder="e.g., 2">
+            </div>
+            
+            <button onclick="calculateEOQ()">Calculate Order Quantity</button>
+            
+            <div class="result-box">
+                Most cost-effective order size:<br>
+                <span class="result-value" id="eoqResult">0 units</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Calculate Reorder Point
+        function calculateROP() {
+            const usage = Number(document.getElementById('dailyUsage').value) || 0;
+            const leadTime = Number(document.getElementById('leadTime').value) || 0;
+            const safety = Number(document.getElementById('safetyStock').value) || 0;
+            
+            const rop = (usage * leadTime) + safety;
+            document.getElementById('ropResult').innerText = rop.toLocaleString() + ' units';
+        }
+
+        // Calculate Economic Order Quantity
+        function calculateEOQ() {
+            const demand = Number(document.getElementById('demand').value) || 0;
+            const orderCost = Number(document.getElementById('orderCost').value) || 0;
+            const holdingCost = Number(document.getElementById('holdingCost').value) || 0;
+            
+            if (holdingCost === 0) {
+                document.getElementById('eoqResult').innerText = '0 units (Holding cost needed)';
+                return;
+            }
+            
+            const eoq = Math.sqrt((2 * demand * orderCost) / holdingCost);
+            // Round up to the nearest whole unit
+            document.getElementById('eoqResult').innerText = Math.ceil(eoq).toLocaleString() + ' units';
+        }
+    </script>
+</body>
+</html>
+    id: 'dsi',
+    title: 'Days Sales of Inventory (DSI)',
+    icon: Clock,
+    description: 'Indicates the average number of days it takes a company to turn its inventory into sales.',
+    math: 'DSI = (Average Inventory / COGS) × Days in Period',
+    inputs: [
+      { id: 'avgInv', label: 'Average Inventory', type: 'number' },
+      { id: 'cogs', label: 'Cost of Goods Sold (COGS)', type: 'number' },
+      { id: 'days', label: 'Days in Period (usually 365)', type: 'number', default: 365 }
+    ],
+    calculate: (v) => {
+      if (!v.cogs) return { value: 0, format: 'days' };
+      const days = v.days || 365;
+      const result = ((v.avgInv || 0) / v.cogs) * days;
+      return { value: result, format: 'days' };
+    }
+  },
+  {
+    id: 'eoq',
+    title: 'Economic Order Quantity (EOQ)',
+    icon: Calculator,
+    description: 'The ideal order quantity a company should purchase to minimize inventory costs such as holding costs, shortage costs, and order costs.',
+    math: 'EOQ = √ ( (2 × Demand × Order Cost) / Holding Cost )',
+    inputs: [
+      { id: 'demand', label: 'Annual Demand (units)', type: 'number' },
+      { id: 'orderCost', label: 'Cost per Order ($)', type: 'number' },
+      { id: 'holdingCost', label: 'Holding Cost per Unit per Year ($)', type: 'number' }
+    ],
+    calculate: (v) => {
+      if (!v.holdingCost) return { value: 0, format: 'units' };
+      const result = Math.sqrt((2 * (v.demand || 0) * (v.orderCost || 0)) / v.holdingCost);
+      return { value: result, format: 'units' };
+    }
+  },
+  {
+    id: 'rop',
+    title: 'Reorder Point (ROP)',
+    icon: AlertTriangle,
+    description: 'The specific level at which your stock needs to be replenished to avoid running out of inventory.',
+    math: 'ROP = (Average Daily Usage × Lead Time) + Safety Stock',
+    inputs: [
+      { id: 'dailyUsage', label: 'Average Daily Usage (units)', type: 'number' },
+      { id: 'leadTime', label: 'Lead Time (days)', type: 'number' },
+      { id: 'safetyStock', label: 'Safety Stock (units)', type: 'number', default: 0 }
+    ],
+    calculate: (v) => {
+      const result = ((v.dailyUsage || 0) * (v.leadTime || 0)) + (v.safetyStock || 0);
+      return { value: result, format: 'units' };
+    }
+  },
+  {
+    id: 'safety_stock',
+    title: 'Safety Stock',
+    icon: Package,
+    description: 'Extra inventory held to mitigate the risk of stockouts caused by uncertainties in supply and demand.',
+    math: 'Safety Stock = (Max Daily Usage × Max Lead Time) - (Avg Daily Usage × Avg Lead Time)',
+    inputs: [
+      { id: 'maxUsage', label: 'Maximum Daily Usage (units)', type: 'number' },
+      { id: 'maxLead', label: 'Maximum Lead Time (days)', type: 'number' },
+      { id: 'avgUsage', label: 'Average Daily Usage (units)', type: 'number' },
+      { id: 'avgLead', label: 'Average Lead Time (days)', type: 'number' }
+    ],
+    calculate: (v) => {
+      const maxTerm = (v.maxUsage || 0) * (v.maxLead || 0);
+      const avgTerm = (v.avgUsage || 0) * (v.avgLead || 0);
+      const result = Math.max(0, maxTerm - avgTerm);
+      return { value: result, format: 'units' };
+    }
+  },
+  {
+    id: 'gmroi',
+    title: 'GMROI',
+    icon: TrendingUp,
+    description: 'Gross Margin Return on Investment evaluates inventory profitability.',
+    math: 'GMROI = Gross Margin / Average Inventory Cost',
+    inputs: [
+      { id: 'grossMargin', label: 'Gross Margin ($)', type: 'number' },
+      { id: 'avgInvCost', label: 'Average Inventory Cost ($)', type: 'number' }
+    ],
+    calculate: (v) => {
+      if (!v.avgInvCost) return { value: 0, format: 'ratio' };
+      const result = (v.grossMargin || 0) / v.avgInvCost;
+      return { value: result, format: 'ratio' };
+    }
+  }
+];
+
+export default function App() {
+  const [activeTab, setActiveTab] = useState(formulas[0].id);
+  const [values, setValues] = useState({});
+
+  // Initialize default values when switching tabs
+  const handleTabChange = (id) => {
+    setActiveTab(id);
+    const activeFormula = formulas.find(f => f.id === id);
+    const initialValues = {};
+    activeFormula.inputs.forEach(input => {
+      if (input.default !== undefined) {
+        initialValues[input.id] = input.default;
+      }
+    });
+    setValues(initialValues);
+  };
+
+  const handleInputChange = (id, value) => {
+    setValues(prev => ({
+      ...prev,
+      [id]: value === '' ? '' : Number(value)
+    }));
+  };
+
+  const activeFormula = formulas.find(f => f.id === activeTab);
+  const result = activeFormula.calculate(values);
+
+  const formatResult = (val, format) => {
+    if (isNaN(val) || !isFinite(val)) return '0.00';
+    
+    switch (format) {
+      case 'currency':
+        return '$' + val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      case 'ratio':
+        return val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' : 1';
+      case 'days':
+        return val.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' days';
+      case 'units':
+        return Math.ceil(val).toLocaleString('en-US') + ' units';
+      default:
+        return val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans p-4 md:p-8">
+      <div className="max-w-6xl mx-auto">
+        
+        {/* Header */}
+        <header className="mb-8 flex items-center space-x-4">
+          <div className="bg-indigo-600 p-3 rounded-xl shadow-sm">
+            <BarChart3 className="w-8 h-8 text-white" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900">Inventory Calculator</h1>
+            <p className="text-slate-500">Master your inventory metrics and formulas</p>
+          </div>
+        </header>
+
+        <div className="flex flex-col lg:flex-row gap-8">
+          
+          {/* Sidebar / Tabs */}
+          <div className="w-full lg:w-1/3 xl:w-1/4">
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden sticky top-8">
+              <div className="p-4 bg-slate-100/50 border-b border-slate-200 font-semibold text-slate-700">
+                Calculators
+              </div>
+              <nav className="flex flex-col p-2 gap-1 h-[60vh] overflow-y-auto">
+                {formulas.map((formula) => {
+                  const Icon = formula.icon;
+                  const isActive = activeTab === formula.id;
+                  return (
+                    <button
+                      key={formula.id}
+                      onClick={() => handleTabChange(formula.id)}
+                      className={`flex items-center space-x-3 w-full p-3 rounded-xl text-left transition-all ${
+                        isActive 
+                          ? 'bg-indigo-50 text-indigo-700 font-medium' 
+                          : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                      }`}
+                    >
+                      <Icon className={`w-5 h-5 ${isActive ? 'text-indigo-600' : 'text-slate-400'}`} />
+                      <span className="text-sm">{formula.title}</span>
+                    </button>
+                  );
+                })}
+              </nav>
+            </div>
+          </div>
+
+          {/* Main Calculator Area */}
+          <div className="w-full lg:w-2/3 xl:w-3/4">
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8">
+              
+              {/* Active Formula Header */}
+              <div className="mb-8 border-b border-slate-100 pb-8">
+                <div className="flex items-center space-x-3 mb-3">
+                  {React.createElement(activeFormula.icon, { className: 'w-6 h-6 text-indigo-600' })}
+                  <h2 className="text-2xl font-bold text-slate-900">{activeFormula.title}</h2>
+                </div>
+                <p className="text-slate-600 mb-6">{activeFormula.description}</p>
+                
+                <div className="bg-indigo-50/50 border border-indigo-100 rounded-xl p-4 flex flex-col md:flex-row gap-4 items-start md:items-center">
+                  <div className="bg-white p-2 rounded-lg border border-indigo-100">
+                    <Info className="w-5 h-5 text-indigo-500" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider block mb-1">Formula</span>
+                    <code className="text-sm md:text-base font-mono text-indigo-900 font-semibold">
+                      {activeFormula.math}
+                    </code>
+                  </div>
+                </div>
+              </div>
+
+              {/* Calculator Inputs and Outputs Layout */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+                
+                {/* Inputs */}
+                <div className="space-y-5">
+                  <h3 className="text-lg font-semibold text-slate-800 mb-4">Input Variables</h3>
+                  {activeFormula.inputs.map((input) => (
+                    <div key={input.id}>
+                      <label htmlFor={input.id} className="block text-sm font-medium text-slate-700 mb-1.5">
+                        {input.label}
+                      </label>
+                      <input
+                        type="number"
+                        id={input.id}
+                        value={values[input.id] ?? ''}
+                        onChange={(e) => handleInputChange(input.id, e.target.value)}
+                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-slate-900 font-medium"
+                        placeholder="0.00"
+                        min="0"
+                        step="any"
+                      />
+                    </div>
+                  ))}
+                </div>
+
+                {/* Results Card */}
+                <div className="flex flex-col justify-center bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-8 text-white shadow-lg relative overflow-hidden">
+                  <div className="absolute top-0 right-0 p-32 bg-white/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+                  <div className="relative z-10">
+                    <span className="text-slate-300 text-sm font-medium uppercase tracking-wider mb-2 block">
+                      Calculated Result
+                    </span>
+                    <div className="text-4xl md:text-5xl font-bold tracking-tight break-words text-white">
+                      {formatResult(result.value, result.format)}
+                    </div>
+                    
+                    {/* Small contextual hints based on format */}
+                    <div className="mt-6 pt-6 border-t border-slate-700/50 flex items-start space-x-3 text-slate-400">
+                      <Info className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                      <p className="text-sm">
+                        {result.format === 'units' && "Values representing physical items are rounded up to the nearest whole unit."}
+                        {result.format === 'ratio' && "This ratio expresses the relationship between the metric and the underlying investment/cost."}
+                        {result.format === 'currency' && "Financial value calculated based on current inputs."}
+                        {result.format === 'days' && "Estimated duration based on current turnover metrics."}
+                        {result.format === 'number' && "Standard numeric calculation."}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  );
+}
+
+```
